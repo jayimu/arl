@@ -10,6 +10,8 @@ print(ws)
 x = (ws/2) - (w/2)   
 y = (hs/2) - (h/2)
 window.title('第一个tkinter应用')
+
+
 window.geometry('%dx%d+%d+%d' % (w, h, x, y)) 
 
 label = tkinter.Label(window, text='Hello World!')
