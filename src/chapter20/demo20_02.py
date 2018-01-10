@@ -13,10 +13,10 @@
     9
 '''
 def square(x):
-    return x ** x
+    return x * x
 
 def add(x,y):
-    return x * y
+    return x + y
  
 if __name__ == '__main__':
     import doctest,demo20_02
