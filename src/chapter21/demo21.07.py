@@ -11,9 +11,7 @@ def index():
 @app.route('/user/<name>')
 def user(name):
     return render_template('user.txt', name1=name)
-import time
-millis = int(round(time.time()))
-print(millis)
+
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port='1234')
     
