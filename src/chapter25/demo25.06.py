@@ -5,8 +5,6 @@ df = pandas.read_csv('gapminder.tsv',sep='\t')
 
 global_yearly_life_expectancy = df.groupby('year')['lifeExp'].mean()
 print(global_yearly_life_expectancy)
-
-
 multi_group_var = df.groupby('year')['gdpPercap'].mean()
 print(multi_group_var)
 
