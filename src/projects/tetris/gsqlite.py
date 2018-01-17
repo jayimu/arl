@@ -1,15 +1,4 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
-"""
-ZetCode PyQt5 tutorial 
-
-This is a Tetris game clone.
-
-Author: Jan Bodnar
-Website: zetcode.com 
-Last edited: August 2017
-"""
 
 from PyQt5.QtWidgets import QMainWindow, QWidget,QFrame, QDesktopWidget, QApplication,QLabel,QMessageBox,QInputDialog,QLineEdit,QPushButton
 from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal
@@ -34,7 +23,7 @@ class start(QWidget):
         qbtn1.resize(qbtn.sizeHint())
         qbtn1.move(100, 216)       
         
-        self.resize(300, 400)
+        self.resize(270, 400)
         self.center()
         self.setWindowTitle('入口')        
         self.show()    
@@ -42,7 +31,7 @@ class start(QWidget):
     def register(self):
         a=self.close()
         if a:
-            self.next=register()
+            self.next=Register()
             self.next.show()    
     
     def login(self):
@@ -84,12 +73,13 @@ class login(QWidget):
         
                    
         self.le = QLineEdit(self)
-        self.le.setText('请输入用户名')
+        self.le.setPlaceholderText('请输入用户名')
         self.le.resize(200,30)
         self.le.move(50, 66)
                  
         self.les = QLineEdit(self)
-        self.les.setText('请输入密码')
+        self.les.setPlaceholderText('请输入密码')
+        self.les.setEchoMode(QLineEdit.Password) 
         self.les.resize(200,30)
         self.les.move(50, 146)
         
@@ -103,7 +93,7 @@ class login(QWidget):
         self.setWindowTitle('登录')
 
     def start(self):
-        users=user()
+        users=User()
         username=self.getName()
         password=self.getPwd()
         num=users.check(username, password)
@@ -137,7 +127,7 @@ class login(QWidget):
     
 
 #注册部分
-class register(QWidget):
+class Register(QWidget):
     
     def __init__(self):
         super().__init__()
@@ -147,12 +137,13 @@ class register(QWidget):
         
                    
         self.le = QLineEdit(self)
-        self.le.setText('请输入用户名')
+        self.le.setPlaceholderText('请输入用户名')
         self.le.resize(200,30)
         self.le.move(50, 66)
                  
         self.les = QLineEdit(self)
-        self.les.setText('请输入密码')
+        self.les.setPlaceholderText('请输入密码')
+        self.les.setEchoMode(QLineEdit.Password) 
         self.les.resize(200,30)
         self.les.move(50, 146)
         
@@ -166,12 +157,12 @@ class register(QWidget):
         self.setWindowTitle('注册')        
         #self.show()    
     def start(self):
-        users=user()
+        users=User()
         username=self.getName()
         password=self.getPwd()
         users.create(username, password)
-        a=self.close()
-        if a:
+        result=self.close()
+        if result:
             self.next=Tetris()
             self.next.show()
     def getName(self):
@@ -233,7 +224,7 @@ class Tetris(QMainWindow):
             (screen.height()-size.height())/2)
         
            
-class user():
+class User():
             
     def conn(self):
         conn = sqlite3.connect(dbPath)
@@ -359,7 +350,7 @@ class Rank(QFrame):
         self.lb.setStyleSheet("QLabel {color:#f1f28a;font-size:18px;font-weight:900;padding-top:10px;text-align:center;}")
         self.lb.move(0,0)
         a=1 
-        users=user()
+        users=User()
         info=users.queryrank()
         rnum=len(info)
         if rnum<10:
@@ -676,7 +667,7 @@ class Board(QFrame):
             self.timer.stop()
             self.isStarted = False
             num=self.numLinesRemoved
-            users=user()
+            users=User()
             users.update(num)
             self.msg2Statusbar.emit("Game over")
 

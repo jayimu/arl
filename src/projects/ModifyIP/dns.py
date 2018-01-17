@@ -9,7 +9,7 @@ from urllib3 import *
 from asyncio.tasks import sleep
 import time
 
-class Example(QMainWindow):
+class ModifyIP(QMainWindow):
     
     def __init__(self):
         super().__init__()
@@ -22,7 +22,7 @@ class Example(QMainWindow):
         self.lb.setText('当前IP')
         self.lb.move(50,22) 
         #获取当前ip  
-        ip=GetLocalIP()    
+        ip=getLocalIP()    
         self.le = QLineEdit(self)
         self.le.setText(ip)
         self.le.resize(150,22)
@@ -47,27 +47,27 @@ class Example(QMainWindow):
         self.setWindowTitle('获取当前ip')    
         self.show()
     def start(self):
-        a=self.GETtext()
+        a=self.gettext()
         t=int(a)*1000
         self.timer=QTimer(self)
         self.timer.timeout.connect(self.setip)
         self.timer.start(t)
      
-    def GETtext(self):
+    def gettext(self):
         a=self.les.text()
         return a   
         
-    def setip(self):
-        ip=GetLocalIP()
+    def setip(self):    
+        ip=getLocalIP()
         self.le.setText(ip)
-        UpdateIp()    
+        updateIp()    
 
 http = PoolManager()
 #替换以下参数
-ID="LTAIy4yiWlxjnF6c"
-Secret="H4PwbOoVQeribfS7skuQPKq05wC88m"
+ID="LTxIx5yi4l6jmFxc"
+Secret="P4Pwa3cox3QrixfS543a4fruQPKq35wC942"
 RegionId="cn-hangzhou"
-DomainName="jiketiku.cn"
+DomainName="geekori.com"
 #想要自动修改的主机名和域名类型
 HostNameList = ['www','@']
 Types = "A"
@@ -75,8 +75,8 @@ Types = "A"
 clt = client.AcsClient(ID,Secret,RegionId)
 
 #获取公网ip
-def GetLocalIP():
-    IPInfo = http.request('GET',"http://ip.chinaz.com/getip.aspx")
+def getLocalIP():
+    IPInfo = http.request('get',"http://ip.chinaz.com/getip.aspx")
     IPInfo=IPInfo.data.decode('utf-8')
     IPInfo=IPInfo.replace('b','')
     IPInfo=IPInfo.replace('ip','"ip"')
@@ -86,29 +86,29 @@ def GetLocalIP():
     return IP
 
 #获取域名列表（暂时无用）
-def GetDomainList():
+def getDomainList():
     DomainList = DescribeDomainsRequest.DescribeDomainsRequest()
     DomainList.set_accept_format('json')
     DNSListJson = json.loads(clt.do_action_with_exception(DomainList))
     print (DNSListJson)
 
 #更新域名ip
-def EditDomainRecord(HostName, RecordId, Types, IP):
+def editDomainRecord(HostName, RecordId, Types, IP):
     try:
-        UpdateDomainRecord = UpdateDomainRecordRequest.UpdateDomainRecordRequest()
-        UpdateDomainRecord.set_accept_format('json')
-        UpdateDomainRecord.set_RecordId(RecordId)
-        UpdateDomainRecord.set_RR(HostName)
-        UpdateDomainRecord.set_Type(Types)
-        UpdateDomainRecord.set_TTL('600')
-        UpdateDomainRecord.set_Value(IP)
-        UpdateDomainRecordJson = json.loads(clt.do_action_with_exception(UpdateDomainRecord))
-        print (UpdateDomainRecordJson)
+        updateDomainRecord = updateDomainRecordRequest.updateDomainRecordRequest()
+        updateDomainRecord.set_accept_format('json')
+        updateDomainRecord.set_RecordId(RecordId)
+        updateDomainRecord.set_RR(HostName)
+        updateDomainRecord.set_Type(Types)
+        updateDomainRecord.set_TTL('600')
+        updateDomainRecord.set_Value(IP)
+        updateDomainRecordJson = json.loads(clt.do_action_with_exception(updateDomainRecord))
+
     except Exception as e:
         return e   
 
 #获取域名信息
-def GetAllDomainRecords(DomainName, Types, IP):
+def getAllDomainRecords(DomainName, Types, IP):
     DomainRecords = DescribeDomainRecordsRequest.DescribeDomainRecordsRequest()
     DomainRecords.set_accept_format('json')
     DomainRecords.set_DomainName(DomainName)
@@ -120,19 +120,18 @@ def GetAllDomainRecords(DomainName, Types, IP):
             if RR == HostName and Type == Types:
                 RecordId = x['RecordId']
                 print (RecordId)
-                EditDomainRecord(HostName, RecordId, Types, IP)
+                editDomainRecord(HostName, RecordId, Types, IP)
 
-def UpdateIp():
-    IP = GetLocalIP()
-    print(IP)
-    GetDomainList()
-    GetAllDomainRecords(DomainName, Types, IP)
+def updateIp():
+    IP = getLocalIP()
+    #getDomainList()
+    getAllDomainRecords(DomainName, Types, IP)
     
         
 
 if __name__ == '__main__':
     
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = ModifyIP()
     sys.exit(app.exec_())
 
