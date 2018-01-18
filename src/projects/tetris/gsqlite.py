@@ -1,14 +1,27 @@
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import QMainWindow, QWidget,QFrame, QDesktopWidget, QApplication,QLabel,QMessageBox,QInputDialog,QLineEdit,QPushButton
+"""
+ZetCode PyQt5 tutorial 
+
+This is a Tetris game clone.
+
+Author: Jan Bodnar
+Website: zetcode.com 
+Last edited: August 2017
+"""
+
+from PyQt5.QtWidgets import QMainWindow, QWidget,QFrame, QDesktopWidget,QAction,QMenu,QApplication,QLabel,QMessageBox,QInputDialog,QLineEdit,QPushButton
 from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal
 from PyQt5.QtGui import QPainter, QColor 
+from pymysql import *
 import sys, random
 import time,os
 import pygame
 import sqlite3
 
-class start(QWidget):
+
+class Start(QWidget):
     def __init__(self):
         super().__init__()
         self.startUI()
@@ -23,7 +36,7 @@ class start(QWidget):
         qbtn1.resize(qbtn.sizeHint())
         qbtn1.move(100, 216)       
         
-        self.resize(270, 400)
+        self.resize(275, 400)
         self.center()
         self.setWindowTitle('入口')        
         self.show()    
@@ -31,7 +44,7 @@ class start(QWidget):
     def register(self):
         a=self.close()
         if a:
-            self.next=Register()
+            self.next=register()
             self.next.show()    
     
     def login(self):
@@ -41,20 +54,20 @@ class start(QWidget):
             f.close()
             d2=int(round(time.time()))
             if (d2-int(round(float(ptime))))<0:
-                a=self.close()
-                if a:
+                result=self.close()
+                if result:
                     self.next=Tetris()
                     self.next.show()
             else:
-                a=self.close()
-                if a:
-                    self.next=login()
+                result=self.close()
+                if result:
+                    self.next=Login()
                     self.next.show()                    
                 
         else:        
             a=self.close()
             if a:
-                self.next=login()
+                self.next=Login()
                 self.next.show()      
     def center(self):
         '''centers the window on the screen'''
@@ -64,7 +77,7 @@ class start(QWidget):
         self.move((screen.width()-size.width())/2, 
             (screen.height()-size.height())/2)        
 
-class login(QWidget):
+class Login(QWidget):
     def __init__(self):
         super().__init__()
         
@@ -73,13 +86,15 @@ class login(QWidget):
         
                    
         self.le = QLineEdit(self)
+
         self.le.setPlaceholderText('请输入用户名')
         self.le.resize(200,30)
         self.le.move(50, 66)
                  
         self.les = QLineEdit(self)
+
         self.les.setPlaceholderText('请输入密码')
-        self.les.setEchoMode(QLineEdit.Password) 
+        self.les.setEchoMode(QLineEdit.Password)
         self.les.resize(200,30)
         self.les.move(50, 146)
         
@@ -127,7 +142,7 @@ class login(QWidget):
     
 
 #注册部分
-class Register(QWidget):
+class register(QWidget):
     
     def __init__(self):
         super().__init__()
@@ -137,13 +152,15 @@ class Register(QWidget):
         
                    
         self.le = QLineEdit(self)
+
         self.le.setPlaceholderText('请输入用户名')
         self.le.resize(200,30)
         self.le.move(50, 66)
-                 
+                         
+        
         self.les = QLineEdit(self)
         self.les.setPlaceholderText('请输入密码')
-        self.les.setEchoMode(QLineEdit.Password) 
+        self.les.setEchoMode(QLineEdit.Password)
         self.les.resize(200,30)
         self.les.move(50, 146)
         
@@ -161,6 +178,9 @@ class Register(QWidget):
         username=self.getName()
         password=self.getPwd()
         users.create(username, password)
+        times=str(time.time()+3600)
+        with open("time.txt","w") as f:
+            f.write(times)           
         result=self.close()
         if result:
             self.next=Tetris()
@@ -199,17 +219,35 @@ class Tetris(QMainWindow):
         self.tboard.setGeometry(150,0,400,700)
         self.rank=Rank(self)
         self.rank.setGeometry(0,0,150,700)
-        self.statusbar = self.statusBar()  
-        
+        self.statusbar = self.statusBar()        
         self.tboard.msg2Statusbar[str].connect(self.statusbar.showMessage)
         
         self.tboard.start()
+        
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('文件')
+        
+        impMenu = QMenu('功能', self)
+        impAct = QAction('注销', self) 
+        impMenu.addAction(impAct)
+        
+        fileMenu.addMenu(impMenu)
+        impAct.triggered.connect(self.clear)
         
         self.resize(550, 720)
         self.center()
         self.setWindowTitle('Tetris')        
         #self.show()
-       
+    
+    def clear(self):
+        ok=QMessageBox.information(self,"注销","是否注销?",QMessageBox.Yes|QMessageBox.No)
+        if ok== QMessageBox.Yes:
+            os.remove('time.txt')
+            os.remove('credentials.txt')
+            self.close()
+            
+               
+                
     def quit(self):
         self.close()
     def show_t(self):
@@ -225,7 +263,6 @@ class Tetris(QMainWindow):
         
            
 class User():
-            
     def conn(self):
         conn = sqlite3.connect(dbPath)
         return conn
@@ -240,14 +277,12 @@ class User():
             cursor.execute(sql)
             db.commit()
             with open("credentials.txt","w") as f:
-                f.write(username)
-                f.close()            
+                f.write(username)        
                 
         except:
             db.rollback()
         
-    def check(self,name,pwd):
-        
+    def check(self,name,pwd):        
         username=name
         password=pwd    
         db=self.conn()
@@ -261,7 +296,6 @@ class User():
             if num>0:
                 with open("credentials.txt","w") as f:
                     f.write(username)
-                    f.close()   
                      
             return num        
         except:
@@ -301,10 +335,10 @@ class User():
         try:   
             cursor.execute(sql)
             result=cursor.fetchall()
-            a=result[0][2]
+            value=result[0][2]
         except:
             db.rollback()
-        if a<ranks:
+        if value<ranks:
             sql1="update t_rank_user set rank='%s' where username='%s'" %(ranks,username)
             try:
                 cursor.execute(sql1)
@@ -380,7 +414,7 @@ class Board(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         music.start(self)
-        self.initBoard()
+        self.initBoard()        
     
            
     def initBoard(self):     
@@ -447,15 +481,13 @@ class Board(QFrame):
 
         
     def pause(self):
-        '''pauses game'''
+        username=''
         if os.path.exists("credentials.txt"):
             f=open("credentials.txt")
             username=f.read()
             f.close()
-        else:
-            username="路人"    
-        if self.isPaused:
-            return
+  
+
         if not self.isStarted:
             return
 
@@ -469,7 +501,7 @@ class Board(QFrame):
             self.timer.start(Board.Speed, self)
             self.msg2Statusbar.emit(username+":"+str(self.numLinesRemoved))
 
-        self.update()
+    
 
         
     def paintEvent(self, event):
@@ -477,9 +509,9 @@ class Board(QFrame):
         
         painter = QPainter(self)
         rect = self.contentsRect()
-
+    
         boardTop = rect.bottom() - Board.BoardHeight * self.squareHeight()
-
+    
         for i in range(Board.BoardHeight):
             for j in range(Board.BoardWidth):
                 shape = self.shapeAt(j, Board.BoardHeight - i - 1)
@@ -488,7 +520,7 @@ class Board(QFrame):
                     self.drawSquare(painter,
                         rect.left() + j * self.squareWidth(),
                         boardTop + i * self.squareHeight(), shape)
-
+    
         if self.curPiece.shape() != Tetrominoe.NoShape:
             
             for i in range(4):
@@ -501,15 +533,14 @@ class Board(QFrame):
 
                     
     def keyPressEvent(self, event):
-        '''processes key press events'''
-        
         if not self.isStarted or self.curPiece.shape() == Tetrominoe.NoShape:
             super(Board, self).keyPressEvent(event)
             return
-
+    
         key = event.key()
         
         if key == Qt.Key_P:
+           
             self.pause()
             return
             
@@ -696,19 +727,19 @@ class Board(QFrame):
         
 
     def drawSquare(self, painter, x, y, shape):
-        '''draws a square of a shape'''        
+     
         
         colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
                       0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
-
+    
         color = QColor(colorTable[shape])
         painter.fillRect(x + 1, y + 1, self.squareWidth() - 2, 
             self.squareHeight() - 2, color)
-
+    
         painter.setPen(color.lighter())
         painter.drawLine(x, y + self.squareHeight() - 1, x, y)
         painter.drawLine(x, y, x + self.squareWidth() - 1, y)
-
+    
         painter.setPen(color.darker())
         painter.drawLine(x + 1, y + self.squareHeight() - 1,
             x + self.squareWidth() - 1, y + self.squareHeight() - 1)
@@ -771,6 +802,7 @@ class Shape(object):
         '''chooses a random shape'''
         
         self.setShape(random.randint(1, 7))
+       
 
         
     def x(self, index):
@@ -846,8 +878,7 @@ class Shape(object):
         result = Shape()
         result.pieceShape = self.pieceShape
         
-        for i in range(4):
-            
+        for i in range(4):            
             result.setX(i, self.y(i))
             result.setY(i, -self.x(i))
 
@@ -891,7 +922,7 @@ if __name__ == '__main__':
             conn.close()
         
         #users=user()
-        s=start()    
+        s=Start()    
         '''if os.path.exists("credentials.txt"):
             f=open("credentials.txt")
             name=f.read()

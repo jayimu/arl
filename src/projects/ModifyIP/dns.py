@@ -64,8 +64,8 @@ class ModifyIP(QMainWindow):
 
 http = PoolManager()
 #替换以下参数
-ID="LTxIx5yi4l6jmFxc"
-Secret="P4Pwa3cox3QrixfS543a4fruQPKq35wC942"
+ID="LTxI55ycy4l6jmFxc4"
+Secret="P4Pwa3cox3QsrixfS543a4fruQPKq35wC942"
 RegionId="cn-hangzhou"
 DomainName="geekori.com"
 #想要自动修改的主机名和域名类型
