@@ -1,5 +1,3 @@
-# Pandas   Matplotlib
-
 from pandas import *
 from matplotlib.pyplot import *
 import sqlite3
@@ -7,7 +5,6 @@ import sqlalchemy
 engine = sqlalchemy.create_engine('sqlite:///bra.sqlite')
 rcParams['font.sans-serif'] = ['SimHei']
 sales = read_sql('select source,size1 from t_sales',engine)
-#print(sales)
 size1Count = sales.groupby('size1')['size1'].count()
 print(size1Count)
 size1Total = size1Count.sum()

@@ -1,26 +1,30 @@
-# 直接使用复杂的SQL语句和视图
+# 按上胸围分析胸罩的销售比例
 from pandas import *
 from matplotlib.pyplot import *
 import sqlite3
 import sqlalchemy
 engine = sqlalchemy.create_engine('sqlite:///bra.sqlite')
 rcParams['font.sans-serif'] = ['SimHei']
-sales = read_sql('''
-select 'A' as 罩杯,  printf('%.2f%%',(100.0 * count(*) / (select count(*) from t_sales where size1 is not null))) as 比例,count(*) as 销量 from t_sales where size1='A'
-union all
-select 'B' , printf('%.2f%%',(100.0 * count(*) / (select count(*) from t_sales where size1 is not null))) as 比例,count(*) from t_sales where size1='B'
-union all
-select 'C' , printf('%.2f%%',(100.0 * count(*) / (select count(*) from t_sales where size1 is not null))) as 比例,count(*)from t_sales where size1='C'
-union all
-select 'D' , printf('%.2f%%',(100.0 * count(*) / (select count(*) from t_sales where size1 is not null))) as 比例,count(*) from t_sales where size1='D'
-order by 销量 desc
-''',engine)
-print(sales)
+options.display.float_format = '{:,.2f}%'.format
 
-sales1 = read_sql('select * from v_sales', engine)
+sales = read_sql('select source,size2 from t_sales',engine)
+size2Count = sales.groupby('size2')['size2'].count()
+print(size2Count)
 
-labels = ['A罩杯','B罩杯','C罩杯','D罩杯']
-sales1['销量'].plot(kind='pie',labels = labels, autopct='%.2f%%')
-axis('equal')
+size2Total = size2Count.sum()
+print(size2Total)
+size2 = size2Count.to_frame(name='销量')
+
+size2.insert(0,'比例',100*size2Count/size2Total)
+
+size2.index.names=['上胸围']
+size2 = size2.sort_values(['销量'], ascending=[0])
+print(size2)
+
+labels = size2.index.tolist()
+size2['销量'].plot(kind='pie',labels=labels,autopct='%.2f%%')
 legend()
+axis('equal')
 show()
+
+

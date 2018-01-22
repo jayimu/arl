@@ -336,6 +336,7 @@ class User():
             cursor.execute(sql)
             result=cursor.fetchall()
             value=result[0][2]
+            #
         except:
             db.rollback()
         if value<ranks:

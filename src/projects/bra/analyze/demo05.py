@@ -1,4 +1,5 @@
-# 天猫和京东各种的上胸围胸罩销售比例
+# 罩杯和上胸围分布【盒状图和直方图】
+# 75B
 from pandas import *
 from matplotlib.pyplot import *
 import sqlite3
@@ -6,59 +7,32 @@ import sqlalchemy
 engine = sqlalchemy.create_engine('sqlite:///bra.sqlite')
 rcParams['font.sans-serif'] = ['SimHei']
 options.display.float_format = '{:,.2f}%'.format
+sales = read_sql('select source,size1,size2,color1 from t_sales', engine)
 
-sales = read_sql('select source,size2 from t_sales',engine)
-# DataFrame = table  view
-# sales['source'] = Series
-tmallSize2GroupCount = sales[sales['source'] == '天猫'].groupby('size2')['size2'].count()
-tmallSize2Total = tmallSize2GroupCount.sum()
-print(tmallSize2Total)
-# 将Series转换为DataFrame
-tmallSize2 = tmallSize2GroupCount.to_frame(name='销量')
-
-tmallSize2.insert(0,'比例',100 * tmallSize2GroupCount / tmallSize2Total)
-tmallSize2.index.names=['罩杯']
-print(tmallSize2)
-
-# 京东
-jdSize2GroupCount = sales[sales['source'] == '京东'].groupby('size2')['size2'].count()
-jdSize2Total = jdSize2GroupCount.sum()
-print(jdSize2GroupCount)
-# 将Series转换为DataFrame
-jdSize2 = jdSize2GroupCount.to_frame(name='销量')
-
-jdSize2.insert(0,'比例',100 * jdSize2GroupCount / jdSize2Total)
-jdSize2.index.names=['罩杯']
-print(jdSize2)
-
-#labels1 = ['A罩杯','B罩杯','C罩杯']
-#labels2 = ['A罩杯','B罩杯','C罩杯','D罩杯']
-labels1 = []
-labels2 = []
-labels1 = tmallSize2.index.tolist()
-labels2= jdSize2.index.tolist()
-
-    
+sales.loc[sales['size1'] == 'A','size1'] = 1
+sales.loc[sales['size1'] == 'B','size1'] = 2
+sales.loc[sales['size1'] == 'C','size1'] = 3
+sales.loc[sales['size1'] == 'D','size1'] = 4
+sales = sales.dropna()
+print(sales)
+sales['size3'] = sales['size1'].astype('str') + '.' + sales['size2'].astype('str')
+print(sales)
+# 将size3转换为float类型的列
+sales['size3'] = sales['size3'].astype('float')
+box = {
+    'facecolor':'0.75',
+    'edgecolor':'b',
+    'boxstyle':'round'
+    }
 fig,(ax1,ax2) = subplots(1,2,figsize=(12,6))
-'''
-ax1.pie(tmallSize2['销量'],labels = labels1, autopct='%.2f%%')
-ax2.pie(jdSize2['销量'],labels = labels2, autopct='%.2f%%')
-ax1.legend()
-ax2.legend()
-ax1.set_title('天猫上胸围比例')
-ax2.set_title('京东上胸围比例')
-ax1.axis('equal')
-ax2.axis('equal')
-'''
-intLabels = []
-for label in labels1:
-    intLabels.append(int(label))
-ax1.bar(intLabels, tmallSize2['销量'])
-ax2.pie(jdSize2['销量'],labels = labels2, autopct='%.2f%%')
+ax1.hist(x=sales.size3) 
+ax2.boxplot(sales.size3)
+ax1.text(3.5,8000,'1:A\n2:B\n3:C\n4:D\n小数部分：上胸围\n1.80 = A80\n2.75 = B75',bbox = box)
+ax2.text(1.2,4,'1:A\n2:B\n3:C\n4:D\n小数部分：上胸围\n1.80 = A80\n2.75 = B75',bbox = box)
 
-ax2.legend()
-ax1.set_title('天猫上胸围比例')
-ax2.set_title('京东上胸围比例')
-
-ax2.axis('equal')
 show()
+
+# A、B、C、D  =  1、2、3、4
+# B.75  2.75   3.80
+
+
