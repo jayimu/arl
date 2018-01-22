@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<meta charset='UTF-8'>
+	<title>天气</title>
+	<script src='jquery-1.7.2.min.js'></script>
+</head>
+<body>
+	
+	<center>
+		<h2>天气查询</h2><hr>
+		<div>
+			<table>
+				<tr>
+					<td>城市名称:</td>
+					<td>
+						<input type='text' placeholder='中文或拼音' class='city'>
+					</td>
+				</tr>
+				<tr></tr>
+				<tr>
+					<td align='center'>
+						<button class='submit'>查找</button>
+					</td>
+
+					<td align='center'>
+						<input type='reset'>
+					</td>
+				</tr>
+
+			</table>
+			
+			<table width="60%">
+				<tr>
+					<td>城市:</td>
+					<td class="city"></td>
+					<td></td>
+					<td></td>
+					<td>天气:</td>
+					<td class="weater"></td>
+				</tr>
+				<tr>
+					<td>温度:</td>
+					<td class="temp"></td>
+					<td></td>
+					<td></td>
+					<td>湿度:</td>
+					<td class="sd"></td>
+				</tr>
+				<tr>
+					<td>风向:</td>
+					<td class="feng"></td>
+					<td></td>
+					<td></td>
+					<td>能见度:</td>
+					<td class='njd'></td>
+				</tr>
+				<tr>
+					<td>pm2.5:</td>
+					<td class="pm25"></td>
+					<td></td>
+					<td></td>
+					<td>限行:</td>
+					<td class="xx"></td>
+				</tr>
+			</table>
+		</div>
+	</center>
+	<script>
+	$('.submit').click(function(){
+	    var city = $('.city').val()
+	    $.ajax({
+	       url:'/weather',
+	       data:{city:city},
+	       dataType:'json',
+	       type:'GET',
+	       success:function(data){
+	           console.dir(data)
+	           $('.city').html(data[2]);
+	           $('.weater').html(data[4]);
+	           $('.temp').html(data[5]);
+	           $('.feng').html(data[8] + data[9]);
+	           $('.sd').html(data[6]);
+	           $('.njd').html(data[7]);
+	           $('.pm25').html(data[10]);
+	           $('.xx').html(data[11]);
+	       }
+	    })
+	})
+	</script>
+</body>
+</html>
